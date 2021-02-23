@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <style>
+
+    </style>
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script type="text/javascript" src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+  var map = new ol.Map({
+    layers: [
+      new ol.layer.Tile({
+        source: new ol.source.OSM()
+      })
+    ],
+    target: 'map',
+    view: new ol.View({
+      center: ol.proj.fromLonLat([-5, 58.5]),
+      zoom: 9
+    })
+  });
+  var data_url ="http://overpass-api.de/api/interpreter?data=[out:json][timeout:120];{{style:node,way,relation{text:name;}}}(node['natural'='beach']({{bbox}});way['natural'='beach']({{bbox}});relation['natural'='beach']({{bbox}}););"
+[out:json][timeout:120];(node["natural"="beach"]({south},{west},{north},{east});way["natural"="beach"]({south},{west},{north},{east});relation["natural"="beach"]({south},{west},{north},{east}););out center;
+  // If you want dynamic version
+// var vectorSource = new ol.source.Vector({
+//   format: new ol.format.GeoJSON(),
+//   loader: function(extent, resolution, projection) {
+//     var epsg4326Extent =
+//         ol.proj.transformExtent(extent, projection, 'EPSG:4326');
+//     var stringExtent = epsg4326Extent[1] + ',' + epsg4326Extent[0] + ',' +
+//         epsg4326Extent[3] + ',' + epsg4326Extent[2];
+     // Usefull if you use an ol.loadingstrategy.bbox instead of  ol.loadingstrategy.all
+//      var query = '[out:json][timeout:25];(node["amenity"="cafe"](' + stringExtent + ');way["amenity"="cafe"](' + stringExtent + ');relation["amenity"="cafe"](' + stringExtent + '););out;>;out skel qt;';
+//      var query = '[bbox:48.64209701511677,6.084880828857422,48.743172495967094,6.318340301513672][out:json][timeout:25];(node["leisure"]["access"!="private"]["sport"="swimming"];node["access"!="private"]["leisure"="swimming_pool"];way["leisure"]["access"!="private"]["sport"="swimming"];way["access"!="private"]["leisure"="swimming_pool"];relation["leisure"]["access"!="private"]["sport"="swimming"];relation["access"!="private"]["leisure"="swimming_pool"];);out center;>;'
+//     fetch('https://overpass-api.de/api/interpreter', {
+//       method: "POST",
+//       body: query
+//     })
+//     .then(response => response.json())
+//     .then(json => {
+//       const geojson = osmtogeojson(json, {
+//         flatProperties: true
+//       });
+//       var features = new ol.format.GeoJSON().readFeatures(geojson, {
+//         featureProjection: map.getView().getProjection()
+//       });
+//       vectorSource.addFeatures(features);
+//     });
+//   },
+//   strategy: ol.loadingstrategy.all // ol.loadingstrategy.bbox
+// });
+//
+// var vectorLayer = new ol.layer.Vector({
+//   renderMode: 'image',
+//   source: vectorSource
+// })
+// map.addLayer(vectorLayer)
+  </script>
+  </body>
+</html>

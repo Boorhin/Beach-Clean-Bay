@@ -1,0 +1,196 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+
+    </style>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.16.0/d3.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3-array/1.2.2/d3-array.min.js"></script>
+  </head>
+  <body>
+    <label for "selectBeach">View data for :</label>
+    <select id="selectBeach" value="Balnakeil"> </select>
+    <div id="graph-holder">      </div>
+    <script type="text/javascript">
+      const width =  800;
+      const height = 400;
+      const margin = 40;
+      var svg2 = d3.select("#graph-holder")
+          .append("svg")
+          .attr("viewBox", [0, 0, width, height])
+      var chart = svg2.append("g")
+        .attr('transform', `translate(${margin}, ${margin})`);
+      var beachSelector = d3.select("#selectBeach");
+      const dur = 2000;   // transition time
+
+
+      //Y axis
+            var yScale = d3.scaleLinear()
+              .range([height-2*margin, 0]);
+            var yAxis= d3.axisLeft(yScale);
+            chart.append('g')
+              .attr("class","myYaxis")
+              .attr("stroke","steelblue")
+
+            chart.append("text")
+                  .attr("x",0)
+                  .attr("y", -margin/2)
+                  .attr("text-anchor","middle")
+                  .attr("fill","steelblue")
+                  .text("kg")
+      //Y2 axis
+      var y2Scale = d3.scaleLinear()
+              .range([height-2*margin, 0]);
+      var y2Axis = d3.axisRight(y2Scale);
+      chart.append('g')
+        .attr("transform", "translate( " + (width-2*margin) + ", 0 )")
+        .attr("stroke","orange")
+        .attr("class","myY2axis");
+
+      chart.append("text")
+            .attr("x",width-2*margin)
+            .attr("y", -margin/2)
+            .attr("text-anchor","middle")
+            .attr("fill","orange")
+            .text("kg/day")
+      // X axis
+            var xScale = d3.scaleTime()
+              .range([0, width-2*margin])
+            var xAxis = d3.axisBottom(xScale);
+            chart.append('g')
+                .attr('transform', `translate(0, ${height-2*margin})`)
+                .attr("class","myXaxis");
+        // Data Processing
+        function movingAverage(values, N) {
+          let i = 0;
+          let sum = 0;
+          const means = new Float64Array(values.length).fill(NaN);
+          for (let n = Math.min(N - 1, values.length); i < n; ++i) {
+            sum += values[i];
+          }
+          for (let n = values.length; i < n; ++i) {
+            sum += values[i];
+            means[i] = sum / N;
+            sum -= values[i - N + 1];
+          }
+          return means;
+        }
+
+
+
+        d3.json("https://www.plasticatbay.org/ChartBal/BeachData.php").then(function(dataBeach){
+            var FilterBeach = d3.map(dataBeach, function(d){return(d.Beach)}).keys();
+
+            beachSelector.selectAll("myOptions")
+                      .data(FilterBeach)
+                      .enter()
+                      .append("option")
+                      .text(function(d){return d;})
+                      .attr("value", function(d){return d;});
+            beachSelector.on("change",function(d){
+                        var selectedBeach = d3.select(this).property("value");
+                        update(selectedBeach);
+                      });
+
+
+            update("Balnakeil");
+
+            function update(myBeach){
+              var linearr = [];
+              var dates = [];
+              var weights= [];
+              var cums =[];
+              var days =[];
+              var rate =[];
+              var duration =[];
+              var evol =[];
+
+              var beachFilter=dataBeach.filter(function(d){ if (d.Beach==myBeach) {return d}});
+              beachFilter.sort(function(a,b)
+                {return new Date(a.Dates)- new Date(b.Dates);});
+              for (var i in beachFilter){
+                      dates.push(d3.timeParse("%Y-%m-%d")(beachFilter[i].Dates));
+                      weights.push(parseFloat(beachFilter[i].Weights))};
+
+              for (var i = 1; i < dates.length; i++) {
+                        var duration = (dates[i]-dates[i-1]);
+                        days.push(new Date(dates[i-1].getTime()+duration/2));
+                        rate.push(weights[i]/(duration/(1000*60*60*24)));
+                        evol.push({x:days[i-1], y:rate[i-1]})  };
+
+              weights.reduce(function(a,b,i) { return cums[i] = a+b; },0);
+
+              for (var i in dates){
+                        linearr.push({x:dates[i], y:cums[i]})};
+
+              xScale.domain(d3.extent(linearr, d=>d.x));
+              yScale.domain([0, d3.max(linearr, d=>d.y)]).nice(5);
+              y2Scale.domain([0,d3.max(rate)]).nice(5)
+              console.log(evol)
+              chart.selectAll(".graph")
+                    .transition()
+                    .duration(dur)
+                    .style("opacity", 0);
+
+              svg2.selectAll(".graphtitle")
+                    .transition()
+                    .duration(dur)
+                    .style("opacity", 0);
+
+              svg2.append("text")
+                        .attr("class","graphtitle")
+                        .transition()
+                        .duration(dur)
+                        .attr("x", (width/2))
+                        .attr("y", (margin/2))
+                        .attr("text-anchor", "middle")
+                        .text("Cumulative weight for "+myBeach);
+
+              chart.selectAll(".myXaxis")
+                    .transition()
+                    .duration(dur)
+                    .call(xAxis);
+              chart.selectAll(".myYaxis")
+                    .transition()
+                    .duration(dur)
+                    .attr("text", "kg")
+                    .call(yAxis);
+              chart.selectAll(".myY2axis")
+                    .transition()
+                    .duration(dur)
+                    .call(y2Axis);
+
+              var area = d3.area()
+                            .curve(d3.curveStep)
+                            .x(d => xScale(d.x))
+                            .y0(yScale(0))
+                            .y1(d => yScale(+d.y))
+                            ;
+              var line=d3.line()
+                        .x(function(d){return xScale(d.x)})
+                        .y(function (d){return y2Scale(d.y)})
+              chart.append("path")
+                .datum(linearr)
+                .attr("class","graph")
+                .attr("fill","steelblue" )
+                .attr("d", area)
+                .transition()
+                .duration(dur);
+              chart.append("path")
+                  .datum(evol)
+                 .attr("class","graph")
+                 .attr("fill", "transparent")
+                 .attr("d",line)
+                .attr("stroke", "orange")
+                .style("stroke-width", 3)
+                .transition()
+                .duration(dur);
+                  };
+
+
+        });
+
+      </script>
+  </body>
+</html>
