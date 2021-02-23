@@ -1,5 +1,5 @@
 # Beach-Clean-Bay
-Citizen science portal for recording weight of plastic collected
+Citizen science portal for recording weight of plastic collected during beach/ river cleans.
 
 Beach-Clean-Bay aims at offering beachcleaners and organisation with an easy tool to record the weight of plastic they collect.
 The database is hosted by plasticatbay.org and can be filled and recorded through the plasticatbay/research page. The code is still very rough but provide already essential overviews of the evolution of plastic pollution. The idea is to give the ability to other groups to integrate the tool into their own webpage. We also would like to use the registry of OpenStreetMap to match our database with it and also to contribute to their beach database. The code is functional but needs a lot of improvement to make it more user friendly and also eventually communicate with other databases. Help is welcomed.
