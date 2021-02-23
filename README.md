@@ -8,16 +8,17 @@ The database is hosted by plasticatbay.org and can be filled and recorded throug
 ```
 html Map.html
 ```
-
 <p align="center">
   <img src="Screenshot from 2021-01-02 19-29-53.png" width="400">
 </p>
+
 #### graph of the evolution of pollution in the selected beach (js + d3)
+
 ```
 html BeachReport.html
 ```
 
-<p align="left">
+<p align="center">
   <img src="Screenshot from 2021-01-02 17-52-04.png" width="640">
 </p>
 ### under development
