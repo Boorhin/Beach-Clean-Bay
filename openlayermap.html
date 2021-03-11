@@ -25,7 +25,6 @@
     })
   });
   var data_url ="http://overpass-api.de/api/interpreter?data=[out:json][timeout:120];{{style:node,way,relation{text:name;}}}(node['natural'='beach']({{bbox}});way['natural'='beach']({{bbox}});relation['natural'='beach']({{bbox}}););"
-[out:json][timeout:120];(node["natural"="beach"]({south},{west},{north},{east});way["natural"="beach"]({south},{west},{north},{east});relation["natural"="beach"]({south},{west},{north},{east}););out center;
   // If you want dynamic version
 // var vectorSource = new ol.source.Vector({
 //   format: new ol.format.GeoJSON(),
